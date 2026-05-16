@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Profile Validation
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 256 &&
+             (data.keys().hasOnly(['uid', 'email', 'favoriteSports', 'favoriteLeagues', 'preferredPlatforms', 'notificationsEnabled', 'updatedAt']));
+    }
+
+    match /profiles/{uid} {
+      allow get: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUserProfile(incoming()) && (incoming().updatedAt == request.time);
+      allow update: if isOwner(uid) && isValidUserProfile(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['favoriteSports', 'favoriteLeagues', 'preferredPlatforms', 'notificationsEnabled', 'updatedAt']) &&
+        incoming().updatedAt == request.time
+      );
+      allow delete: if false; // Profiles shouldn't be deleted by users usually, or we can allow if needed
+    }
+  }
+}

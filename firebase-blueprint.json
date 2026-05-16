@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User preferences and settings for sports betting analysis.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth unique ID." },
+        "email": { "type": "string", "description": "User email address." },
+        "favoriteSports": { "type": "array", "items": { "type": "string" }, "description": "List of favorite sports." },
+        "favoriteLeagues": { "type": "array", "items": { "type": "string" }, "description": "List of favorite leagues." },
+        "preferredPlatforms": { "type": "array", "items": { "type": "string" }, "description": "Betting platforms like DraftKings, FanDuel." },
+        "notificationsEnabled": { "type": "boolean", "description": "Whether the user wants to receive bet alerts." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last time the profile was updated." }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/profiles/{uid}": {
+      "schema": "UserProfile",
+      "description": "User specific preferences and settings documented by UID."
+    }
+  }
+}
