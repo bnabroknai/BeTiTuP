@@ -51,7 +51,7 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ delay: i * 0.1 }}
-            className="relative bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all rounded-xl overflow-hidden group cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+            className="relative bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all rounded-xl overflow-hidden group cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.3)] gold-border"
           >
             <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
               <Sparkles className="w-12 h-12 text-emerald-400" />

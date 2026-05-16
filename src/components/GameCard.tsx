@@ -16,10 +16,10 @@ export function GameCard({ game, isSelected, onClick }: GameCardProps) {
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`w-full text-left rounded-xl p-4 transition-all duration-200 cursor-pointer ${
+      className={`w-full text-left rounded-xl p-4 transition-all duration-200 cursor-pointer gold-border ${
         isSelected 
-          ? 'bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]' 
-          : 'bg-white/5 border border-white/10 hover:bg-white/10'
+          ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]' 
+          : 'bg-white/5 border-white/10 hover:bg-white/10'
       }`}
     >
       <div className="flex items-center justify-between mb-3 text-[10px] font-mono text-gray-400">
