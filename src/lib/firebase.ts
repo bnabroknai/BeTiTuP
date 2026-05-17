@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
@@ -17,30 +17,19 @@ export enum OperationType {
   WRITE = 'write',
 }
 
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-  }
-}
-
+/**
+ * Handles Firestore errors securely by logging minimal info and throwing a generic message.
+ * This prevents leaking PII (UID, Email) and internal paths to the UI or client-side logs.
+ */
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-    },
-    operationType,
-    path
-  }
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  // Log only the operation and a generic error for security
+  // We avoid logging the full path and user info to prevent PII exposure in client logs
+  console.error(`Firestore Error [${operationType}]:`, errorMessage);
+
+  // Throw a generic error to the UI
+  throw new Error(`Database operation failed (${operationType}). Please try again later.`);
 }
 
 export async function loginWithGoogle() {
