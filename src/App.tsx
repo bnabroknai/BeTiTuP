@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Game, BetRecommendation, Commentary, MarketUpdate, fetchMockLiveGames, generateBetRecommendations, generateLiveCommentary, fetchMarketIntel } from './services/geminiService';
+import { Game, BetRecommendation, Commentary, MarketUpdate, TopPick, fetchLiveGames, generateBetRecommendations, generateLiveCommentary, fetchMarketIntel, getTopProfitabilityPick } from './services/geminiService';
 import { GameCard } from './components/GameCard';
 import { BetRecommendationsList } from './components/BetRecommendations';
 import { LiveCommentaryStream } from './components/LiveCommentary';
 import { MarketIntelFeed } from './components/MarketIntelFeed';
+import { TopPickDisplay } from './components/TopPickDisplay';
 import { ProfileModal } from './components/ProfileModal';
 import { auth, loginWithGoogle, logout } from './lib/firebase';
 import { User } from 'firebase/auth';
@@ -23,6 +24,9 @@ export default function App() {
   const [marketUpdates, setMarketUpdates] = useState<MarketUpdate[]>([]);
   const [loadingMarket, setLoadingMarket] = useState(false);
 
+  const [topPick, setTopPick] = useState<TopPick | null>(null);
+  const [loadingTopPick, setLoadingTopPick] = useState(false);
+
   const [user, setUser] = useState<User | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -36,12 +40,20 @@ export default function App() {
   // Initialize live games
   const loadGames = async () => {
     setLoadingGames(true);
-    const liveGames = await fetchMockLiveGames();
+    const liveGames = await fetchLiveGames();
     setGames(liveGames);
     if (liveGames.length > 0 && !selectedGameId) {
       setSelectedGameId(liveGames[0].id);
     }
     setLoadingGames(false);
+
+    // Also fetch top pick once we have games
+    if (liveGames.length > 0) {
+        setLoadingTopPick(true);
+        const pick = await getTopProfitabilityPick(liveGames);
+        setTopPick(pick);
+        setLoadingTopPick(false);
+    }
   };
 
   useEffect(() => {
@@ -211,6 +223,8 @@ export default function App() {
 
         {/* Middle Column: AI Analysis & Bets */}
         <div className="lg:col-span-5 flex flex-col space-y-6">
+          <TopPickDisplay topPick={topPick} loading={loadingTopPick} />
+
           <div className="glass-panel p-4 flex-1 flex flex-col bg-white/[0.02]">
             <div className="border-b border-white/10 pb-2 mb-4 flex items-center justify-between">
               <h2 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">

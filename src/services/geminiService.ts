@@ -11,6 +11,8 @@ export interface Game {
   awayScore: number;
   timeRemaining: string;
   period: string;
+  status: 'live' | 'past' | 'scheduled';
+  startTime?: string;
   odds: {
     homeML: number;
     awayML: number;
@@ -27,6 +29,7 @@ export interface BetRecommendation {
   confidence: number; // 0-100
   edge: string; // e.g. "+5.2% EV"
   analysis: string;
+  thoughtProcess?: string;
 }
 
 export interface Commentary {
@@ -46,33 +49,46 @@ export interface MarketUpdate {
   sentiment: 'up' | 'down' | 'neutral';
 }
 
-export async function fetchMockLiveGames(): Promise<Game[]> {
+export interface TopPick {
+  game: Game;
+  recommendation: BetRecommendation;
+  reasoning: string;
+  profitabilityScore: number; // 0-100
+}
+
+export async function fetchLiveGames(): Promise<Game[]> {
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
-          parts: [{ text: `Generate 3 current simulated live sports games (mix of NBA, MLB, or NHL, whichever is plausible today). 
-          Return ONLY a valid JSON array of objects with the following keys:
+          parts: [{ text: `Search for current live and upcoming major sports games (NBA, MLB, NHL) happening today ${new Uint8Array(8).reduce((acc) => acc + '0123456789'[Math.floor(Math.random() * 10)], '')}. 
+          Return a valid JSON array of objects with the following keys:
           - id (string, unique UUID)
           - sport (string)
           - homeTeam (string)
           - awayTeam (string)
           - homeScore (number)
           - awayScore (number)
-          - timeRemaining (string, e.g. "5:42")
-          - period (string, e.g. "3rd Qtr", "Top 5th", "2nd Period")
+          - timeRemaining (string)
+          - period (string)
+          - status ("live", "past", or "scheduled")
+          - startTime (string, optional)
           - odds (object with homeML (number), awayML (number), overUnder (number))
-          Do not include markdown tags. Only the JSON.` }]
+          Return at least 5 games. Use real current data via search grounding.` }]
         }
-      ]
+      ],
+      config: {
+        tools: [{ googleSearch: {} }]
+      }
     });
     
-    // Strip markdown formatting if any
     const text = response.text || "[]";
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleanText);
+    // In case the model returns text alongside JSON, try to extract the array
+    const jsonMatch = cleanText.match(/\[.*\]/s);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : cleanText);
   } catch (error) {
     console.error("Failed to fetch games:", error);
     return [];
@@ -81,37 +97,62 @@ export async function fetchMockLiveGames(): Promise<Game[]> {
 
 export async function generateBetRecommendations(game: Game): Promise<BetRecommendation[]> {
   try {
-    const prompt = `Act as an expert sports betting AI algorithm. Analyze the following live game and provide 3 highly specific high-value bet recommendations across DraftKings, FanDuel, and BetMGM.
+    const prompt = `Analyze this game: ${game.awayTeam} vs ${game.homeTeam}. Status: ${game.status}, Score: ${game.awayScore}-${game.homeScore}.
+    Provide 3 high-value bet recommendations.
+    Return a JSON array of objects with:
+    - id, sportsbook, type, description, odds, confidence, edge, analysis.
+    - thoughtProcess: A detailed step-by-step reasoning of why this pick was selected (the "logic flow").
     
-    Game: ${game.awayTeam} (${game.awayScore}) @ ${game.homeTeam} (${game.homeScore})
-    Time: ${game.period}, ${game.timeRemaining}
-    Current Lines: ML Home ${game.odds.homeML > 0 ? '+' : ''}${game.odds.homeML}, Away ${game.odds.awayML > 0 ? '+' : ''}${game.odds.awayML}, O/U ${game.odds.overUnder}
-
-    Provide realistic prop bets, live moneyline angles, or spread bets. Calculate a realistic "edge".
-    Return ONLY a valid JSON array with keys:
-    - id (unique string)
-    - sportsbook ("DraftKings", "FanDuel", "BetMGM", or "Caesars")
-    - type (string, e.g., "Player Prop", "Live Spread", "Alt Over/Under")
-    - description (string, e.g., "LeBron James Over 6.5 Assists", "Lakers +3.5")
-    - odds (string, e.g., "-110", "+140")
-    - confidence (number 0-100)
-    - edge (string, e.g., "+4.5% EV")
-    - analysis (string, 1-2 sentences of why this bet is valuable given the live game context)
-    
-    Do not include markdown tags. Only the JSON.`;
+    Use realistic live market data.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        model: 'gemini-3-flash-preview',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        config: {
+            tools: [{ googleSearch: {} }]
+        }
     });
 
     const text = response.text || "[]";
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleanText);
+    const jsonMatch = cleanText.match(/\[.*\]/s);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : cleanText);
   } catch (error) {
     console.error("Failed to generate bets:", error);
     return [];
   }
+}
+
+export async function getTopProfitabilityPick(games: Game[]): Promise<TopPick | null> {
+    try {
+        const gameContext = games.map(g => `${g.awayTeam} @ ${g.homeTeam}`).join(', ');
+        const prompt = `From these games: ${gameContext}, identify the single highest profitability pick across all markets.
+        Analyze weather, starting lineups, momentum, and historical trends via search.
+        
+        Return a JSON object with:
+        - game: the full Game object as provided but with any real-time score updates
+        - recommendation: a BetRecommendation object
+        - reasoning: 2-3 sentences of deep technical analysis
+        - profitabilityScore: 0-100 rating of the EV quality
+        
+        Focus on specific DraftKings/FanDuel value gaps.`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-pro-preview', // Pro for high-level reasoning
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                tools: [{ googleSearch: {} }]
+            }
+        });
+
+        const text = response.text || "null";
+        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const jsonMatch = cleanText.match(/\{.*\}/s);
+        return JSON.parse(jsonMatch ? jsonMatch[0] : cleanText);
+    } catch (e) {
+        console.error("Top pick failed:", e);
+        return null;
+    }
 }
 
 export async function generateLiveCommentary(game: Game, recentContext: string[]): Promise<Commentary> {

@@ -1,12 +1,21 @@
 import React from 'react';
 import { BetRecommendation } from '../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
-import { Target, Zap, Activity, Sparkles } from 'lucide-react';
+import { Target, Zap, Activity, Sparkles, BrainCircuit } from 'lucide-react';
 
 export function BetRecommendationsList({ recommendations, loading }: { recommendations: BetRecommendation[], loading: boolean }) {
   if (loading) {
     return (
       <div className="space-y-4">
+        <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl mb-6">
+          <div className="relative">
+            <Activity className="w-5 h-5 text-emerald-400 animate-pulse" />
+            <div className="absolute inset-0 bg-emerald-400/20 blur-xl animate-pulse"></div>
+          </div>
+          <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest animate-pulse">
+            Neural Processing: Engaging Thinking Models...
+          </p>
+        </div>
         {[1, 2, 3].map(i => (
           <div key={i} className="animate-pulse bg-white/5 h-28 rounded-xl border border-white/10 flex flex-col justify-between p-4">
              <div className="flex justify-between items-start">
@@ -83,6 +92,18 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
                 <span className="font-bold text-emerald-400 mr-1">AI Analysis:</span>
                 {rec.analysis}
               </div>
+
+              {rec.thoughtProcess && (
+                <div className="mt-4 p-3 bg-black/40 border border-emerald-500/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                    <BrainCircuit className="w-3 h-3 animate-pulse" />
+                    Neural Thought Protocol
+                  </div>
+                  <p className="text-xs text-gray-400 italic leading-relaxed">
+                    {rec.thoughtProcess}
+                  </p>
+                </div>
+              )}
 
               <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-gray-400 uppercase tracking-tighter">
                 <span>Confidence Score</span>

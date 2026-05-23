@@ -24,15 +24,20 @@ export function GameCard({ game, isSelected, onClick }: GameCardProps) {
     >
       <div className="flex items-center justify-between mb-3 text-[10px] font-mono text-gray-400">
         <span className="flex items-center gap-1.5 uppercase font-bold text-emerald-400">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-          </span>
+          {game.status === 'live' ? (
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+          ) : (
+            <div className={`w-2 h-2 rounded-full ${game.status === 'past' ? 'bg-red-500' : 'bg-gray-500'}`}></div>
+          )}
           {game.sport}
         </span>
         <span className="flex items-center gap-1">
           <Clock className="w-3.5 h-3.5" />
-          {game.period} • {game.timeRemaining}
+          {game.status === 'scheduled' ? (game.startTime || 'TBD') : `${game.period} • ${game.timeRemaining}`}
+          {game.status === 'past' && ' (FINAL)'}
         </span>
       </div>
 
