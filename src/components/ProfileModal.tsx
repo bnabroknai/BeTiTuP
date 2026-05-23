@@ -93,7 +93,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
                 <h2 className="text-xl font-bold font-display uppercase tracking-wider">User Intelligence Profile</h2>
               </div>
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={onClose} className="p-2 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none rounded-full transition-colors" aria-label="Close profile">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -113,7 +113,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                       className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
                         favoriteSports.includes(sport)
                           ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                          : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                          : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none'
                       }`}
                     >
                       {sport}
@@ -136,7 +136,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                       className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
                         preferredPlatforms.includes(platform)
                           ? 'bg-white/20 text-white border-white/30 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                          : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                          : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none'
                       }`}
                     >
                       {platform}
@@ -156,7 +156,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     <p className="text-xs text-gray-400">Push high-confidence signals to display.</p>
                   </div>
                   <button
-                    onClick={() => setNotifications(!notifications)}
+                    onClick={() => setNotifications(!notifications)} role="switch" aria-checked={notifications} aria-label="Toggle neural bet alerts"
                     className={`relative w-12 h-6 rounded-full transition-colors ${notifications ? 'bg-emerald-500' : 'bg-white/20'}`}
                   >
                     <motion.div
@@ -172,7 +172,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full py-4 bg-emerald-500 text-black font-black uppercase tracking-widest rounded-xl shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-emerald-500 text-black font-black uppercase tracking-widest rounded-xl shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
               >
                 {saving ? (
                   <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />

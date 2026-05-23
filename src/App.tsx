@@ -139,10 +139,11 @@ export default function App() {
             <button 
               onClick={loadGames}
               disabled={loadingGames}
-              className="hidden md:flex items-center gap-2 text-sm px-3 py-1.5 bg-white/5 rounded-md hover:bg-white/10 text-gray-300 transition-colors disabled:opacity-50 border border-white/10"
+              aria-label="Refresh live games"
+              className="flex items-center gap-2 text-sm px-3 py-1.5 bg-white/5 rounded-md hover:bg-white/10 text-gray-300 transition-colors disabled:opacity-50 border border-white/10 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingGames ? 'animate-spin' : ''}`} />
-              Refresh
+              <RefreshCw className={`w-4 h-4 ${loadingGames ? "animate-spin" : ""}`} />
+              <span className="md:inline">Refresh</span>
             </button>
             
             <div className="h-8 w-px bg-white/10 mx-2 hidden md:block" />
@@ -151,7 +152,8 @@ export default function App() {
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setIsProfileOpen(true)}
-                  className="flex items-center gap-2 pl-1 pr-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all"
+                  aria-label="Open profile settings"
+                  className="flex items-center gap-2 pl-1 pr-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full hover:bg-emerald-500/20 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
                 >
                   <img 
                     src={user.photoURL || ''} 
@@ -161,14 +163,20 @@ export default function App() {
                   />
                   <span className="text-xs font-bold text-emerald-400">PROFILE</span>
                 </button>
-                <button onClick={logout} className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors" title="Logout">
+                <button
+                  onClick={logout}
+                  className="p-2 hover:bg-white/10 rounded-full text-gray-400 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
+                  title="Logout"
+                  aria-label="Logout"
+                >
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
               <button 
                 onClick={loginWithGoogle}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.05] transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                aria-label="Access Terminal (Login with Google)"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-black font-black text-xs uppercase tracking-widest rounded-xl hover:scale-[1.05] transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black outline-none"
               >
                 <LogIn className="w-4 h-4" />
                 Access Terminal

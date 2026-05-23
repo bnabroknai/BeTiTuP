@@ -1,7 +1,7 @@
 import React from 'react';
 import { BetRecommendation } from '../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
-import { Target, Zap, Activity, Sparkles } from 'lucide-react';
+import { Target, Zap, Sparkles, ExternalLink } from 'lucide-react';
 
 export function BetRecommendationsList({ recommendations, loading }: { recommendations: BetRecommendation[], loading: boolean }) {
   if (loading) {
@@ -31,13 +31,13 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
     );
   }
 
-  const getSportsbookColor = (book: string) => {
+  const getSportsbookLink = (book: string) => {
     switch (book.toLowerCase()) {
-      case 'draftkings': return 'bg-green-500/10 text-green-400 border-green-500/20';
-      case 'fanduel': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'betmgm': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'caesars': return 'bg-slate-100/10 text-slate-200 border-slate-100/20';
-      default: return 'bg-brand/10 text-brand border-brand/20';
+      case 'draftkings': return 'https://sportsbook.draftkings.com';
+      case 'fanduel': return 'https://sportsbook.fanduel.com';
+      case 'betmgm': return 'https://sportsbook.betmgm.com';
+      case 'caesars': return 'https://williamhill.com';
+      default: return '#';
     }
   };
 
@@ -51,7 +51,7 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ delay: i * 0.1 }}
-            className="relative bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all rounded-xl overflow-hidden group cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.3)] gold-border"
+            className="relative bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition-all rounded-xl overflow-hidden group shadow-[0_4px_20px_rgba(0,0,0,0.3)] gold-border"
           >
             <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
               <Sparkles className="w-12 h-12 text-emerald-400" />
@@ -60,7 +60,7 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border border-white/10 bg-black/40 text-gray-300`}>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border border-white/10 bg-black/40 text-gray-300">
                       {rec.sportsbook}
                     </span>
                     <span className="text-[10px] text-gray-400 flex items-center gap-1 uppercase tracking-tighter">
@@ -85,13 +85,26 @@ export function BetRecommendationsList({ recommendations, loading }: { recommend
               </div>
 
               <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-gray-400 uppercase tracking-tighter">
-                <span>Confidence Score</span>
-                <div className="w-32 h-1.5 bg-black/40 rounded-full overflow-hidden">
-                   <div 
-                    className="h-full bg-emerald-500"
-                    style={{ width: `${rec.confidence}%` }}
-                   ></div>
+                <div className="flex flex-col gap-1">
+                  <span>Confidence Score</span>
+                  <div className="w-32 h-1.5 bg-black/40 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500"
+                      style={{ width: `${rec.confidence}%` }}
+                    ></div>
+                  </div>
                 </div>
+
+                <a
+                  href={getSportsbookLink(rec.sportsbook)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Bet Now on ${rec.sportsbook}: ${rec.description}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all border border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none"
+                >
+                  Bet Now
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
             </div>
           </motion.div>
